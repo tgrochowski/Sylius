@@ -15,34 +15,33 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="https://api-platform.com/schema/metadata https://api-platform.com/schema/metadata/metadata-2.0.xsd"
 >
-    <resource class="%sylius.model.shipping_method_translation.class%" shortName="ShippingMethodTranslation">
+    <resource class="%sylius.model.channel_pricing.class%" shortName="ChannelPricing">
         <graphql>
             <operation name="collection_query">
                 <attribute name="pagination_type">page</attribute>
             </operation>
-
-            <operation name="item_query" />
         </graphql>
 
         <attribute name="validation_groups">sylius</attribute>
 
-        <collectionOperations />
+        <attribute name="normalization_context">
+            <attribute name="groups">
+                <attribute>shop:channel_pricing:read</attribute>
+            </attribute>
+        </attribute>
 
         <itemOperations>
-            <itemOperation name="admin_get">
-                <attribute name="method">GET</attribute>
-                <attribute name="path">/admin/shipping-method-translations/{id}</attribute>
-            </itemOperation>
-
             <itemOperation name="shop_get">
                 <attribute name="method">GET</attribute>
-                <attribute name="path">/shop/shipping-method-translations/{id}</attribute>
+                <attribute name="path">/shop/channel-pricings/{id}</attribute>
             </itemOperation>
         </itemOperations>
 
-        <property name="id" identifier="true" writable="false" />
-        <property name="name" identifier="false" required="true" />
-        <property name="description" identifier="false" />
-        <property name="locale" identifier="false" required="true" />
+        <collectionOperations>
+        </collectionOperations>
+
+        <property name="id" writable="false" readable="true" identifier="true" />
+        <property name="price" writable="false" readable="true" />
+        <property name="originalPrice" writable="false" readable="true" />
     </resource>
 </resources>
