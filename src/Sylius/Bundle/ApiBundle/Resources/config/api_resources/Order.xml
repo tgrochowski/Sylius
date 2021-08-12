@@ -49,7 +49,7 @@
             <operation name="shop_remove_item">
                 <attribute name="method">DELETE</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Cart\RemoveItemFromCart</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Cart\RemoveItemFromCart</attribute>
                 <attribute name="args">
                     <attribute name="id">
                         <attribute name="type">String</attribute>
@@ -63,7 +63,7 @@
             <operation name="shop_change_quantity">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Cart\ChangeItemQuantityInCart</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Cart\ChangeItemQuantityInCart</attribute>
                 <attribute name="args">
                     <attribute name="id">
                         <attribute name="type">String</attribute>
@@ -89,7 +89,7 @@
             <operation name="shop_address">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Checkout\AddressOrder</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Checkout\AddressOrder</attribute>
                 <attribute name="args">
                     <attribute name="id">
                         <attribute name="type">String</attribute>
@@ -109,7 +109,7 @@
             <operation name="shop_select_shipping_method">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Checkout\ChooseShippingMethod</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Checkout\ChooseShippingMethod</attribute>
                 <attribute name="args">
                     <attribute name="shipmentId">
                         <attribute name="type">String</attribute>
@@ -126,7 +126,7 @@
             <operation name="shop_select_payment_method">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Checkout\ChoosePaymentMethod</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Checkout\ChoosePaymentMethod</attribute>
                 <attribute name="args">
                     <attribute name="paymentId">
                         <attribute name="type">String</attribute>
@@ -143,7 +143,7 @@
             <operation name="shop_apply_coupon">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Cart\ApplyCouponToCart</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Cart\ApplyCouponToCart</attribute>
                 <attribute name="args">
                     <attribute name="id">
                         <attribute name="type">ID</attribute>
@@ -160,7 +160,7 @@
             <operation name="shop_remove_coupon">
                 <attribute name="method">PATCH</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Cart\RemoveCouponFromCart</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Cart\RemoveCouponFromCart</attribute>
                 <attribute name="args">
                     <attribute name="couponCode">
                         <attribute name="type">String</attribute>
@@ -484,7 +484,7 @@
                 <attribute name="method">PATCH</attribute>
                 <attribute name="path">/shop/orders/{tokenValue}/items/{orderItemId}</attribute>
                 <attribute name="messenger">input</attribute>
-                <attribute name="input">App\Override\Command\Cart\ChangeItemQuantityInCart</attribute>
+                <attribute name="input">Sylius\Bundle\ApiBundle\Command\Cart\ChangeItemQuantityInCart</attribute>
                 <attribute name="denormalization_context">
                     <attribute name="groups">shop:cart:change_quantity</attribute>
                 </attribute>

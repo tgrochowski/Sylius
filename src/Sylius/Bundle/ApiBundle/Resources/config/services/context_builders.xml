@@ -46,5 +46,6 @@
         >
             <argument type="service" id="sylius_api.serializer_context_builder.http_request_method_type.inner" />
         </service>
+
     </services>
 </container>
