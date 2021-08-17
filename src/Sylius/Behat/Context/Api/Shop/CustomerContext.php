@@ -483,6 +483,22 @@ final class CustomerContext implements Context
         );
     }
 
+    /**
+     * @When I prepare shop POST customer mutation
+     */
+    public function iPrepareShopPostCustomerMutation(): void
+    {
+//        $this->
+
+        $graphqlMutation = "mutation shop_postCustomer (\$input: shop_postCustomerInput!) {
+            shop_postCustomer(input: \$input){
+		        customer{
+                    id
+                }
+            }
+        }";
+    }
+
     private function isViolationWithMessageInResponse(Response $response, string $message): bool
     {
         $violations = $this->responseChecker->getResponseContent($response)['violations'];

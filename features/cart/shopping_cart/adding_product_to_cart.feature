@@ -32,3 +32,173 @@ Feature: Adding a simple product to the cart
         When I try to add 0 products "T-shirt banana" to the cart
         Then I should be notified that quantity of added product cannot be lower that 1
         And there should be 0 item in my cart
+
+    @graphql
+    Scenario: Adding a simple product to the cart
+        Given the store has a product "T-shirt banana" priced at "$12.50"
+        When I send the following GraphQL request:
+        """
+        query getProductDetails {
+            product(id: "/api/v2/shop/products/T_SHIRT_BANANA") {
+                id
+                variants{
+                    collection{
+                        id
+                        name
+                    }
+                }
+            }
+        }
+        """
+        Then I should see following response:
+        """
+        {
+            "data": {
+                "product": {
+                    "id": "/api/v2/shop/products/T_SHIRT_BANANA",
+                    "variants": {
+                        "collection": [
+                            {
+                                "id": "/api/v2/shop/product-variants/T_SHIRT_BANANA",
+                                "name": "T-shirt banana"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        """
+        When I send the following GraphQL request:
+        """
+        mutation createCart {
+            shop_postOrder(input: {localeCode: "en_US"}) {
+                order {
+                    tokenValue
+                }
+            }
+        }
+        """
+        Then I save value at key "order.tokenValue" from last response as "orderId".
+        When I have the following GraphQL request:
+        """
+        mutation addItemToCart ($input: shop_add_itemOrderInput!) {
+            shop_add_itemOrder(input: $input) {
+                order{ total }
+            }
+        }
+        """
+        And I prepare the variables for GraphQL request with saved data:
+        """
+        {
+            "input": {
+                "id": "/api/v2/shop/orders/{orderId}",
+                "productVariant": "/api/v2/shop/product-variants/T_SHIRT_BANANA",
+                "quantity": 2
+          }
+        }
+        """
+        Then I have the following GraphQL request:
+        """
+        query pullCart($orderId: ID!) {
+            order(id: $orderId) {
+                items {
+                    edges{
+                        node{
+                            productName
+                            _id
+                            quantity
+                            unitPrice
+                        }
+                    }
+                }
+            }
+        }
+        """
+        And I prepare the variables for GraphQL request with saved data:
+        """
+        {
+            "orderId": "/api/v2/shop/orders/{orderId}"
+        }
+        """
+        Then I save value at key "items.edges.0.node._id" from last response as "orderItemId".
+    #TODO: order item id should always be the same as DB should be purged
+#        Then I should see following response:
+#        """
+#        {
+#          "data": {
+#            "order": {
+#              "items": {
+#                "edges": [
+#                  {
+#                    "node": {
+#                      "productName": "T-shirt banana",
+#                      "quantity": 2,
+#                      "unitPrice": 1250
+#                    }
+#                  }
+#                ]
+#              }
+#            }
+#          }
+#        }
+#        """
+        Then I have the following GraphQL request:
+        """
+         mutation removeItemFromCart ($removeItemOrderInput: shop_remove_itemOrderInput!) {
+            shop_remove_itemOrder(input:$removeItemOrderInput) {
+             order {
+               items {
+                 edges {
+                   node {
+                     id
+                   }
+                 }
+               }
+             }
+           }
+         }
+        """
+        And I prepare the variables for GraphQL request with saved data:
+        """
+        {
+            "removeItemOrderInput":  {
+                "id": "/api/v2/shop/orders/{orderId}",
+                "orderItemId": "{orderItemId}"
+            }
+        }
+        """
+        Then I have the following GraphQL request:
+        """
+        query pullCart($orderId: ID!) {
+            order(id: $orderId) {
+                items {
+                    edges{
+                        node{
+                            productName
+                            id
+                            quantity
+                            unitPrice
+                        }
+                    }
+                }
+            }
+        }
+        """
+        And I prepare the variables for GraphQL request with saved data:
+        """
+        {
+            "orderId": "/api/v2/shop/orders/{orderId}"
+        }
+        """
+        Then I should see following response:
+        """
+        {
+            "data": {
+                "order": {
+                    "items": {
+                        "edges": []
+                    }
+                }
+            }
+        }
+        """

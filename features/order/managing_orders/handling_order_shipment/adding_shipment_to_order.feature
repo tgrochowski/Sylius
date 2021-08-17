@@ -1,25 +1,16 @@
-@applying_promotion_coupon
-Feature: Applying promotion coupon
-    In order to pay proper amount after using the promotion coupon
+@shopping_cart
+Feature: Selecting a shipment for the order
+    In order to obtain my order
     As a Visitor
-    I want to have promotion coupon's discounts applied to my cart
+    I want to be able to select shipment method
 
     Background:
         Given the store operates on a single channel in "United States"
-        And the store has a product "PHP T-Shirt" priced at "$100.00"
-        And the store has promotion "Christmas sale" with coupon "SANTA2016"
-        And this promotion gives "$10.00" discount to every order
-
-    @ui @api
-    Scenario: Receiving fixed discount for my cart
-        When I add product "PHP T-Shirt" to the cart
-        And I use coupon with code "SANTA2016"
-        Then my cart total should be "$90.00"
-        And my discount should be "-$10.00"
+        And the store has "abc" shipping method with "1000" fee per unit
 
     @graphql
-    Scenario: Adding and removing simple discount promotion coupon
-        Given this promotion gives "$10.00" discount to every order
+    Scenario: Adding a simple product to the cart
+        Given the store has a product "T-shirt banana" priced at "$12.50"
         When I send the following GraphQL request:
         """
         mutation createCart {
@@ -44,17 +35,18 @@ Feature: Applying promotion coupon
         {
             "input": {
                 "id": "/api/v2/shop/orders/{orderId}",
-                "productVariant": "/api/v2/shop/product-variants/PHP_T_SHIRT",
+                "productVariant": "/api/v2/shop/product-variants/T_SHIRT_BANANA",
                 "quantity": 2
           }
         }
         """
+
         Then I have the following GraphQL request:
         """
-        mutation applyCoupon ($applyCouponInput: shop_apply_couponOrderInput!) {
-            shop_apply_couponOrder(input:$applyCouponInput){
+        mutation addShipping ($selectShippingInput: shop_select_shipping_methodOrderInput!) {
+            shop_select_shipping_methodOrder(input: $selectShippingInput){
                 order{
-                    total
+                    shippingTotal
                 }
             }
         }
@@ -62,9 +54,9 @@ Feature: Applying promotion coupon
         And I prepare the variables for GraphQL request with saved data:
         """
         {
-            "applyCouponInput": {
-                "orderTokenValue": "{orderId}",
-                "couponCode":  "SANTA2016"
+            "selectShippingInput":  {
+                "id": "/api/v2/shop/orders/{orderId}",
+                "shippingMethodCode": "abc"
             }
         }
         """
@@ -72,10 +64,8 @@ Feature: Applying promotion coupon
         """
         {
             "data": {
-                "shop_apply_couponOrder": {
-                    "order": {
-                        "total": 19000
-                    }
+                "order": {
+                    "shippingTotal": 2000
                 }
             }
         }

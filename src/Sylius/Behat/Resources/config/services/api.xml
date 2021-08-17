@@ -220,5 +220,11 @@
             <argument type="service" id="sylius.behat.shared_storage" />
             <argument>%sylius.api.authorization_header%</argument>
         </service>
+
+        <service id="sylius.behat.graphql_platform_client" class="Sylius\Behat\Client\GraphqlPlatformClient" abstract="true">
+            <argument type="service" id="test.client" />
+            <argument type="service" id="sylius.behat.shared_storage" />
+            <argument>%sylius.api.authorization_header%</argument>
+        </service>
     </services>
 </container>

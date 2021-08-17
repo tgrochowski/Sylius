@@ -5,58 +5,31 @@ declare(strict_types=1);
 namespace Sylius\Behat\Context\Api;
 
 use Behat\Behat\Context\Context;
-use Behat\Behat\Context\Environment\InitializedContextEnvironment;
-use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Behat\Mink\Element\DocumentElement;
-use Behatch\Context\RestContext;
-use GraphQL\Type\Introspection;
 use PHPUnit\Framework\ExpectationFailedException;
+use Sylius\Behat\Client\GraphqlClientInterface;
+use Sylius\Behat\Service\SharedStorageInterface;
 
 /**
  * Context for GraphQL.
  */
-final class GraphQLApiPlatformContext implements Context
+final class GraphqlApiPlatformContext implements Context
 {
-    private const METHOD_POST = 'POST';
 
-    private const METHOD_GET = 'GET';
+    /** @var GraphqlClientInterface */
+    private $client;
 
-    private const METHOD_PATCH = 'PATCH';
+    /** @var SharedStorageInterface */
+    private $sharedStorage;
 
-    private const METHOD_DELETE = 'DELETE';
-
-    private $lastResponse;
-
-    private $savedValues = [];
-
-    /** @var RestContext */
-    private $restContext;
-
-    /** @var array */
-    private $graphqlRequest;
-
-    /** @var array */
-    private $lastRequest;
-
-    /**
-     * Gives access to the Behatch context.
-     *
-     * @BeforeScenario
-     */
-    public function gatherContexts(BeforeScenarioScope $scope)
+    public function __construct(GraphqlClientInterface $client,SharedStorageInterface $sharedStorage)
     {
-        /**
-         * @var InitializedContextEnvironment $environment
-         */
-        $environment = $scope->getEnvironment();
-        /**
-         * @var RestContext $restContext
-         */
-        $restContext = $environment->getContext(RestContext::class);
-        $this->restContext = $restContext;
+        $this->client = $client;
+        $this->sharedStorage = $sharedStorage;
     }
+
 
     /**
      * @When I have the following GraphQL request:
@@ -213,6 +186,15 @@ final class GraphQLApiPlatformContext implements Context
     }
 
     /**
+     * @And I send this graphql request
+     */
+    public function ISendThisGraphqlRequest()
+    {
+        $this->graphqlRequest = ['query' => Introspection::getIntrospectionQuery()];
+        $this->sendGraphqlRequest();
+    }
+
+    /**
      * @Then the GraphQL field :fieldName is deprecated for the reason :reason
      */
     public function theGraphQLFieldIsDeprecatedForTheReason(string $fieldName, string $reason)
@@ -243,84 +225,4 @@ final class GraphQLApiPlatformContext implements Context
         return true;
     }
 
-
-    private function sendGraphqlRequest(string $method = self::METHOD_POST): DocumentElement
-    {
-        $this->lastRequest = $this->graphqlRequest;
-        $response = $this->restContext->iSendARequestTo($method, '/api/v2/graphql?' . http_build_query($this->graphqlRequest));
-        $this->saveLastResponse($response);
-
-        return  $response;
-    }
-
-    /**
-     * @return mixed|null
-     */
-    private function getJsonFromResponse(string $response)
-    {
-        $jsonData = json_decode($response, true);
-        if (json_last_error() === \JSON_ERROR_NONE) {
-            return $jsonData;
-        }
-
-        return null;
-    }
-
-    public static function diff($arr1, $arr2)
-    {
-        $diff = [];
-
-        // Check the similarities
-        foreach ($arr1 as $k1 => $v1) {
-            if (isset($arr2[$k1])) {
-                $v2 = $arr2[$k1];
-                if (is_array($v1) && is_array($v2)) {
-                    // 2 arrays: just go further...
-                    // .. and explain it's an update!
-                    $changes = self::diff($v1, $v2);
-                    if (count($changes) > 0) {
-                        // If we have no change, simply ignore
-                        $diff[$k1] = ['upd' => $changes];
-                    }
-                    unset($arr2[$k1]); // don't forget
-                } elseif ($v2 === $v1) {
-                    // unset the value on the second array
-                    // for the "surplus"
-                    unset($arr2[$k1]);
-                } else {
-                    // Don't mind if arrays or not.
-                    $diff[$k1] = ['old' => $v1, 'new' => $v2];
-                    unset($arr2[$k1]);
-                }
-            } else {
-                // remove information
-                $diff[$k1] = ['old' => $v1];
-            }
-        }
-
-        // Now, check for new stuff in $arr2
-        reset($arr2); // Don't argue it's unnecessary (even I believe you)
-        foreach ($arr2 as $k => $v) {
-            // OK, it is quite stupid my friend
-            $diff[$k] = ['new' => $v];
-        }
-
-        return $diff;
-    }
-
-    private function flattenArray(array $array)
-    {
-        $array = reset($array['data']);
-        $ritit = new \RecursiveIteratorIterator(new \RecursiveArrayIterator($array));
-        $result = [];
-        foreach ($ritit as $leafValue) {
-            $keys = [];
-            foreach (range(0, $ritit->getDepth()) as $depth) {
-                $keys[] = $ritit->getSubIterator($depth)->key();
-            }
-            $result[implode('.', $keys)] = $leafValue;
-        }
-
-        return $result;
-    }
 }

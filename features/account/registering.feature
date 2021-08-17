@@ -57,3 +57,48 @@ Feature: Account registration
         And I register this account
         Then I should be notified that new account has been successfully created
         But I should not be logged in
+
+
+    @graphql
+    Scenario: Creating customer account
+        When I prepare shop POST customer mutation
+        And I supply it with following input
+        """
+        {
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john.doe@example.org",
+            "phoneNumber": "+44 123 123 789",
+            "subscribedToNewsletter": false,
+            "password": "S3cret"
+        }
+        """
+        And I send this graphql request
+
+    @graphql
+    Scenario: Creating customer with already existing mail
+        When I have the following GraphQL request:
+        """
+        mutation shop_postCustomer ($input: shop_postCustomerInput!) {
+            shop_postCustomer(input: $input){
+		        customer{
+                    email
+                }
+            }
+        }
+        """
+        And I prepare the variables for GraphQL request with saved data:
+        """
+        {
+            "input":{
+                "firstName": "Jane",
+                "lastName": "Doe",
+                "email": "jane.doe@example.org",
+                "phoneNumber": "+44 123 456 789",
+                "subscribedToNewsletter": true,
+                "password": "S3cret"
+            }
+        }
+        """
+        And I send the same request again
+        Then I should see following error message "email: This email is already used."
